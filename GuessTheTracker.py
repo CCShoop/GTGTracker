@@ -9,6 +9,7 @@ from discord import (
     app_commands,
     File,
     Client,
+    Guild,
     Intents,
     Message,
     TextChannel,
@@ -63,6 +64,7 @@ def main():
 
         def __init__(self, intents):
             super(GuessTheClient, self).__init__(intents=intents)
+            self.guild: Guild
             self.gtg_text_channel: TextChannel
             self.gta_text_channel: TextChannel
             self.gtg_number: int = 0
@@ -109,12 +111,12 @@ def main():
                 data = json.load(file)
                 for firstField, secondField in data.items():
                     if firstField == "text_channels":
-                        self.gtg_text_channel = client.get_channel(
-                            int(secondField["gtg_text_channel"])
-                        )
-                        self.gta_text_channel = client.get_channel(
-                            int(secondField["gta_text_channel"])
-                        )
+                        self.guild = client.get_guild(secondField["guild_id"])
+                        if self.guild is None:
+                            print(f"{get_log_time()}> ERROR: Invalid guild_id \"{secondField['guild_id']}\", exiting")
+                            exit(1)
+                        self.gtg_text_channel = self.guild.get_channel(secondField["gtg_text_channel"])
+                        self.gta_text_channel = self.guild.get_channel(secondField["gta_text_channel"])
                         if self.gtg_text_channel is None:
                             print(f"{get_log_time()}> ERROR: Invalid gtg_text_channel id \"{secondField['gtg_text_channel']}\", exiting")
                             exit(1)
@@ -195,6 +197,7 @@ def main():
             """Writes player information from the players list to the json file"""
             data = {}
             data["text_channels"] = {
+                "guild_id": self.guild.id,
                 "gtg_text_channel": self.gtg_text_channel.id,
                 "gta_text_channel": self.gta_text_channel.id,
             }
