@@ -115,6 +115,12 @@ def main():
                         self.gta_text_channel = client.get_channel(
                             int(secondField["gta_text_channel"])
                         )
+                        if self.gtg_text_channel is None:
+                            print(f"{get_log_time()}> ERROR: Invalid gtg_text_channel id \"{secondField['gtg_text_channel']}\", exiting")
+                            exit(1)
+                        if self.gta_text_channel is None:
+                            print(f"{get_log_time()}> ERROR: Invalid gta_text_channel id \"{secondField['gta_text_channel']}\", exiting")
+                            exit(1)
                         print(
                             f"{get_log_time()}> Got GTG text channel {self.gtg_text_channel.name} with id {self.gtg_text_channel.id}"
                         )
