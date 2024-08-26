@@ -22,7 +22,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 GUESS_THE_LITERAL: Literal = Literal["GuessTheGame", "GuessTheAudio", "All"]
-READ_JSON_FLAG: bool = False
 
 
 def get_time():
@@ -62,6 +61,7 @@ def main():
         """Custom client class for GuessTheGame bot"""
 
         FILE_PATH = "info.json"
+        READ_JSON_FLAG: bool = False
 
         def __init__(self, intents):
             super(GuessTheClient, self).__init__(intents=intents)
@@ -580,9 +580,9 @@ def main():
     @client.event
     async def on_ready():
         """Client on_ready event"""
-        if not READ_JSON_FLAG:
+        if not client.READ_JSON_FLAG:
             client.read_json_file()
-            READ_JSON_FLAG = True
+            client.READ_JSON_FLAG = True
         if not midnight_call.is_running():
             midnight_call.start()
         print(f"{get_log_time()}> {client.user} has connected to Discord!")
