@@ -225,25 +225,27 @@ def main():
         async def might_score_gtg(self):
             if self.scored_gtg_today or not self.players:
                 return
+            somebody_registered = False
             for player in self.players:
-                if (
-                    player.gtgame.registered
-                    and not player.gtgame.skip
-                    and not player.gtgame.completedToday
-                ):
-                    return
+                if player.gtgame.registered:
+                    somebody_registered = True
+                    if not player.gtgame.skip and not player.gtgame.completedToday:
+                        return
+            if not somebody_registered:
+                return
             await self.score_gtg()
 
         async def might_score_gta(self):
             if self.scored_gta_today or not self.players:
                 return
+            somebody_registered = False
             for player in self.players:
-                if (
-                    player.gtaudio.registered
-                    and not player.gtaudio.skip
-                    and not player.gtaudio.completedToday
-                ):
-                    return
+                if player.gtaudio.registered:
+                    somebody_registered = True
+                    if not player.gtaudio.skip and not player.gtaudio.completedToday:
+                        return
+            if not somebody_registered:
+                return
             await self.score_gta()
 
         async def score_gtg(self):
@@ -564,11 +566,11 @@ def main():
     intents = Intents.all()
 
     client = GuessTheClient(intents=intents)
+    client.read_json_file()
 
     @client.event
     async def on_ready():
         """Client on_ready event"""
-        client.read_json_file()
         if not midnight_call.is_running():
             midnight_call.start()
         print(f"{get_log_time()}> {client.user} has connected to Discord!")
@@ -1104,12 +1106,21 @@ def main():
         client.scored_gta_today = False
         client.gtg_number += 1
         client.gta_number += 1
-        await client.gtg_text_channel.send(
-            f"{gtg_everyone}\nIt's time to Guess The Game #{client.gtg_number}!\nhttps://guessthe.game/"
-        )
-        await client.gta_text_channel.send(
-            f"{gta_everyone}\nIt's time to Guess The Audio #{client.gta_number}!\nhttps://guesstheaudio.com/"
-        )
+        gtg_has_players = False
+        gta_has_players = False
+        for player in client.players:
+            if player.gtgame.registered:
+                gtg_has_players = True
+            if player.gtaudio.registered:
+                gta_has_players = True
+        if gtg_has_players:
+            await client.gtg_text_channel.send(
+                f"{gtg_everyone}\nIt's time to Guess The Game #{client.gtg_number}!\nhttps://guessthe.game/"
+            )
+        if gta_has_players:
+            await client.gta_text_channel.send(
+                f"{gta_everyone}\nIt's time to Guess The Audio #{client.gta_number}!\nhttps://guesstheaudio.com/"
+            )
 
     client.run(discord_token)
 
